@@ -1,0 +1,26 @@
+### --- Hidden Files & Directories ---
+# Ignore all hidden files and folders (starting with a dot)
+.*
+
+# Allow specific hidden files/folders if needed
+!.gitignore
+# !.github/  <-- Uncomment if you use GitHub Actions
+
+### --- Dependency Management ---
+# Keep Pipfiles even if you have a blanket '.*' or other rules
+!Pipfile
+!Pipfile.lock
+
+### --- Temporary & Output Files ---
+*.out
+*.trr
+*.pyc
+*#
+*.pkl
+
+### --- Folders & Patterns ---
+# Ignore folders starting with rerun_
+rerun_*/
+
+# Ignore __pycache__ directories anywhere in the project
+**/__pycache__/
