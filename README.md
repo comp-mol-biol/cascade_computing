@@ -177,7 +177,3 @@ The project is configured with the following operations:
 
 **Note on Modifications:** To modify these functions, edit the source file located at:
 `../../cascade_computing/src/compute/signac/sgnc.py`
-
----
-
-**Would you like me to create a template for the `signac.rc` or `project.py` file to accompany this README?**
