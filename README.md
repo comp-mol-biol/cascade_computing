@@ -1,7 +1,3 @@
-Got it. Here is a clean, professional, and strictly text-based version of your `README.md`. I have unified the language to English, improved the formatting for better readability, and fixed the minor syntax errors in your code examples.
-
----
-
 # README: Simulation Project Setup with Signac
 
 This document provides instructions for using the `setup_analysis.ipynb` notebook to initialize and manage simulation projects using the **Signac** framework. This workflow is optimized for protein simulations and helps automate metadata organization, parameter sweeps, and system composition tracking.
