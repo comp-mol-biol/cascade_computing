@@ -1,15 +1,13 @@
 ### --- Hidden Files & Directories ---
-# Ignore all hidden files and folders (starting with a dot)
+# 1. Ignore all hidden files and folders (starting with a dot)
 .*
 
-# Allow specific hidden files/folders if needed
+# 2. EXPLICITLY ALLOW .signac folder
+!.signac/
+
+# 3. Allow specific hidden configuration files
 !.gitignore
 # !.github/  <-- Uncomment if you use GitHub Actions
-
-### --- Dependency Management ---
-# Keep Pipfiles even if you have a blanket '.*' or other rules
-!Pipfile
-!Pipfile.lock
 
 ### --- Temporary & Output Files ---
 *.out
