@@ -1,7 +1,5 @@
 # README: Simulation Project Setup with Signac
 
-This document provides instructions for using the `setup_analysis.ipynb` notebook to initialize and manage simulation projects using the **Signac** framework. This workflow is optimized for protein simulations and helps automate metadata organization, parameter sweeps, and system composition tracking.
-
 ---
 
 ## 1. Environment Setup
@@ -26,13 +24,6 @@ source ./yourname/bin/activate
 
 ```
 
-**Windows:**
-
-```bash
-.\yourname\Scripts\activate
-
-```
-
 ### Install Dependencies
 
 Install the required packages using the provided requirements files. Ensure you provide the correct path to your files.
@@ -44,20 +35,7 @@ pip install -r ./PATH_TO/requirements_cc.txt
 
 ```
 
----
-
-## 2. Prerequisites
-
-Ensure the following components are available in your environment:
-
-* **Signac**: Data management and workflow organization.
-* **Pandas & NumPy**: Data handling and parameter calculations.
-* **MDAnalysis**: Sequence extraction and structural handling.
-* **Custom Toolbox**: This notebook requires helper functions from `compute.utils.toolbox_setup` located in the `cascade_computing` repository.
-
----
-
-## 3. Path and Project Initialization
+## 2. Path and Project Initialization
 
 Open `setup_analysis.ipynb` and configure your local paths:
 
@@ -66,7 +44,7 @@ Open `setup_analysis.ipynb` and configure your local paths:
 
 ---
 
-## 4. System Requirements & Configuration
+## 3. System Requirements & Configuration
 
 To analyze your system, you must specify the proteins and their structural properties.
 
@@ -78,7 +56,7 @@ For every protein in your system, create a configuration dictionary including:
 * **`file`**: Path to the full-length PDB file.
 * **`orig_na`**: Total amino acids in the original full-length protein.
 * **`cut_na`**: Number of amino acids in the simulated fragment.
-* **`min` / `max**`: The residue indices in the full-length protein defining your simulated fragment.
+* **`min`** / **`max`**: The residue indices in the full-length protein defining your simulated fragment.
 
 ### Domain Mapping
 
@@ -104,11 +82,11 @@ mut16 = {
 
 ### The df_domains Reference Table
 
-The notebook aggregates these dictionaries into a `df_domains` table. This serves as the primary metadata source, allowing the notebook to automatically extract amino acid sequences and map analysis results (like Radius of Gyration) to specific domains.
+The notebook aggregates these dictionaries into a `df_domains` table. This serves as the primary metadata source, allowing the notebook to automatically extract amino acid sequences and map analysis results to specific domains.
 
 ---
 
-## 5. Running Signac Operations
+## 4. Running Signac Operations
 
 ### Load the Project
 
@@ -167,9 +145,18 @@ The project is configured with the following operations:
 
 * **`post_processing`**: Sets up the analysis framework.
 * **`transform`**: Trajectory transformation (centering, PBC wrapping).
-* **`contacts` / `contacts_split**`: Computing residue-residue contact maps.
-* **`eval_contacts` / `analysis**`: Statistical evaluation and data processing.
-* **`visualization`**: Generating plots or snapshots.
+* **`contacts`**`: Computing residue-residue contact maps.
+* **`eval_contacts`**: Contact evaluation and creation of the contact record
+* **``analysis**`: Downstream analysis e.g. pivot tables from the contact record
+* **`visualization`**: Generating plots .
 
 **Note on Modifications:** To modify these functions, edit the source file located at:
-`../../cascade_computing/src/compute/signac/sgnc.py`
+`cascade_computing/src/compute/signac/sgnc.py`
+
+---
+
+## 6. Examples & Test
+
+The notebook cascade_computing/tests/debug_test.ipynb allows you test how to use the contact calculation and evaluation on your system. 
+We provide a small trajectory and the resulting contact data of the test run here: https://seafile.rlp.net/seafhttp/f/f448889532704bf98a28/?op=view
+After downloading, unpack the data folder into the cascade_computing/examples folder. You can follow through the debug_test.ipynb using this data.
