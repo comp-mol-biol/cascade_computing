@@ -166,4 +166,4 @@ def run_transform(output_path, label, step, last_frames):
 if __name__ == "__main__":
     
     args = get_args()
-    run_transform(output_path = args.output, label=args.label, step=int(args.step), last_frames=int(args.frames))
+    run_transform( args.output, args.label, int(args.step), int(args.frames))

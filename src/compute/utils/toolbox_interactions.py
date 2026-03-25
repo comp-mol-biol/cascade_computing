@@ -311,7 +311,7 @@ def pi_stacking_contact(candidate_res_pairs,
     -------
     list of list
         List of [resid_a, resid_b] pairs satisfying criteria.
-    """
+    """    
     aromatic_atoms = {
     "PHE": ["CG", "CE1", "CE2"],
     "TYR": ["CG", "CE1", "CE2"],

@@ -169,15 +169,15 @@ def contacts(job):
         "eps": 2,
         "bool_breaks": True,
         "breaks_tol": 1,
-        "n_workers": 40, 
-        "split_parts": 5,
+        "n_workers": 8, 
+        "split_parts": 10,
         "traj_min": 0,
         "traj_max": 0,
         "bool_sc": True,
         "bool_bb": False,
         "pwi": False,
         "bool_q": False,
-        "bool_bonds": True,
+        "bool_bonds": False,
         "bool_debug": False
     }
 
@@ -204,7 +204,7 @@ def contacts(job):
     bool_debug  = cont_params["bool_debug"]
 
     # update metadata
-    name = "example_MUT16_MUT8_ts_" + str(traj_min) + "_" + str(traj_max)
+    name = "minimal_bondss_ts_" + str(traj_min) + "_" + str(traj_max)
     job.document['contact_meta'] = name + '_accont_s' + str(d_step) + "_dha_" + str(delta_ha).replace('.', '_') + "_eps_" + str(eps) + "_brks_" + str(bool_breaks) + "_tol_" + str(breaks_tol) + "_buf" + str(buffer) + "_comp_" + str(n_workers) + "_" + str(split_parts) + "_sc_" + str(bool_sc) + "_bb_" + str(bool_bb) + "_pwi_" + str(bool_pwi) + "_bonds_" + str(bool_bonds) + "_debug_" + str(bool_debug).replace('.', '_')
     contact_path = bookkeeping_path + "/" + job.document['contact_meta']
 
@@ -218,7 +218,7 @@ def contacts(job):
     
     # create bash file
     log_cont = contact_path + '/' + '%j_con_' + label_new + '.out'
-    str_run_contacts = "python3 -u -m " + "src.compute.functions.calc_contacts_opt --path "+ bookkeeping_path+" --label "+label_new+" --output "+contact_path+" --cutoff_ha "+str(delta_ha)+" --step "+str(d_step)+" --cutoff_mol "+str(buffer)+" --cutoff_eps "+ str(eps)+" --breaks "+str(bool_breaks)+" --breaks_tol "+str(breaks_tol)+" --n_workers "+str(n_workers)+" --split_parts "+str(split_parts)+" --traj_min "+str(traj_min)+" --traj_max "+ str(traj_max)+" --sidechains "+ str(bool_sc)+" --backbone "+ str(bool_bb)+" --pwi "+ str(bool_pwi)+" --q "+ str(bool_q)+" --bonds "+ str(bool_bonds)+" --debug "+str(bool_debug)+" --c0 "+ str(c0)+" --ck "+ str(ck)
+    str_run_contacts = "python3 -u -m " + "src.compute.functions.calc_contacts_opt --path "+ bookkeeping_path+" --label "+label_new+" --output "+contact_path+" --cutoff_ha "+str(delta_ha)+" --step "+str(d_step)+" --cutoff_mol "+str(buffer)+" --cutoff_eps "+ str(eps)+" --breaks "+str(bool_breaks)+" --breaks_tol "+str(breaks_tol)+" --n_workers "+str(n_workers)+" --split_parts "+str(split_parts)+" --traj_min "+str(traj_min)+" --traj_max "+ str(traj_max)+" --sidechains "+ str(bool_sc)+" --backbone "+ str(bool_bb)+" --pwi "+ str(bool_pwi)+" --q "+ str(bool_q)+" --bonds "+ str(bool_bonds)+" --debug "+str(bool_debug)#+" --c0 "+ str(c0)+" --ck "+ str(ck)
     print(str_run_contacts)
     l_commands = [
         'export PYTHONPATH=$PYTHONPATH:'+PATH_GIT,
@@ -230,7 +230,7 @@ def contacts(job):
     ]
 
     run_cont_file = contact_path + '/' + label_new + "_calc_contacts.sh"
-    content = pptools.create_bash_file_high_memory(l_commands, hours=5, nodes=1, name="cc_contacts_" + label_new)
+    content = pptools.create_bash_file_memory(l_commands, hours=15, nodes=1, name="cc_contacts_" + label_new)
     #content = pptools.create_bash_file_high_memory(l_commands, hours=1, nodes=1, name="cc_contacts_" + label_new)
     with open(run_cont_file, 'w') as file:
         file.write(content)
@@ -335,11 +335,6 @@ def contacts_splid(job):
         str_con = '! sbatch --mail-type=ALL --mail-user=' + EMAIL + ' --output=' + log_cont + " " + run_cont_file
         os.system(str_con)
 
-
-
-
-
-
 @MyProject.operation
 def vizualization(job):
     """
@@ -370,17 +365,23 @@ def vizualization(job):
                                           traj='./' + label_new + '_full_pi_ref.xtc', 
                                           lab=label_new + "_dom", type='VDW', 
                                           step=100, bool_dom=True, l_domains=job.doc.domains)
-        
+
+        print(content)
         with open(output_path + '/' + label_new + "_vmd_sys.tcl", 'w') as file:
             file.write(content)
-        
+        print(output_path + '/' + label_new + "_vmd_sys.tcl")
         content_t = vztools.create_vmd_file(domains_sys, './' + label_new + '_pi_clean.gro', 
                                             traj='./' + label_new + '_full_pi_ref.xtc', 
                                             lab=label_new + "_mol", type='VDW', 
                                             step=100, bool_dom=False, l_domains=job.doc.domains)
+
+        print(content_t)
+
         
         with open(output_path + '/' + label_new + "_vmd_sys_t.tcl", 'w') as file:
             file.write(content_t) 
+
+        print(output_path + '/' + label_new + "_vmd_sys_t.tcl")
     
         log_vcont = output_path + '/' + '%j_' + label_new + '_viz.out'
         str_run = "! sbatch --mail-type=ALL --mail-user=" + EMAIL + " --output=" + log_vcont + ' ' + PATH_FUNCTIONS + '/contact_viz.sh ' + output_path + " " + output_path + '/' + label_new + "_vmd_sys.tcl"
@@ -407,7 +408,7 @@ def eval_contacts(job):
         The job handle
     """
 
-    bool_bonds=True
+    bool_bonds=False
     n_workers=NUM_WORKERS-2
 
     label_new = str(job.document['params']['run'])
@@ -429,7 +430,7 @@ def eval_contacts(job):
         str_eval_contacts]
     run_cont_eval_file = contact_path + '/' + label_new + "_eval_contacts.sh"
     #content = pptools.create_bash_file_high_memory(l_commands, hours=1, nodes=1, name="eval_cc_" + label_new)
-    content = pptools.create_bash_file(l_commands, hours=1, nodes=1, name="eval_cc_" + label_new)
+    content = pptools.create_bash_file_memory(l_commands, hours=1, nodes=1, name="eval_cc_" + label_new)
     with open(run_cont_eval_file, 'w') as file:
         file.write(content)
 
@@ -548,29 +549,102 @@ def collecting_data(job):
     job : signac.contrib.job.Job
         The job handle 
     """
-    prefix = job.document['output_path'] + '/postprocessing/' + str(job.document['params']['run'])
+    prefix = job.document['output_path'] + '/postprocessing/'+ str(job.document['params']['run'])
     res_prefix = job.document['results_path'] + '/' + str(job.document['params']['run'])
 
     job.document['gro'] = prefix + '_pi_clean.gro'
     job.document['pdb'] = prefix + '_pi_clean.pdb'
     job.document['xtc'] = prefix + '_full_pi_ref.xtc'
-    #job.document['tcl'] = prefix + '_vmd_sys_t.tcl'
+    job.document['tcl'] = prefix + '_vmd_sys_t.tcl'
 
     job.document['contact_record'] = res_prefix + '_contacts_only_t.parquet'
-    job.document['contact_meta'] = res_prefix + '_contacts_res_meta.parquet'
-    
+    job.document['contact_meta'] = os.path.dirname(os.path.dirname(res_prefix))+  "/"+str(job.document['params']['run']) +'_contacts_res_meta.parquet'
+    job.document['trajectory_meta'] =os.path.dirname( os.path.dirname(res_prefix))+"/"+ str(job.document['params']['run']) + '_time_status.parquet' 
     # Pivot files
-    for res in ['prot', 'res_type', 'res_org']:
+    for res in ['prot', 'res_type', 'res_org', 'struc_id', 'res_dom']:
         job.document[f'{res}_prob'] = f'{res_prefix}_{res}_prob_pivot.parquet'
-        job.document[f'{res}_freq'] = f'{res_prefix}_{res}_time_count_pivot.parquet'
-        job.document[f'{res}_perc'] = f'{res_prefix}_{res}_list_percistance_distribution_pivot.parquet'
+        job.document[f'{res}_freq'] = f'{res_prefix}_{res}_2time_count_pivot.parquet'
+        job.document[f'{res}_perc'] = f'{res_prefix}_{res}_list_percistance2_distribution_pivot.parquet'
 
     exists1 = os.path.exists(job.document['gro'])
     exists2 = os.path.exists(job.document['pdb'])
     exists3 = os.path.exists(job.document['xtc'])
-    #exists4 = os.path.exists(job.document['tcl'])
+    exists4 = os.path.exists(job.document['tcl'])
+    exists5 = os.path.exists(job.document['trajectory_meta'])
     
-    print('gro',exists1,'pdb',exists2,'xtc', exists3)
+    print('gro',exists1,'pdb',exists2,'xtc', exists3, 'tcl',exists4, 'traj_meta',exists5 )
+
+
+@MyProject.post(breaker)
+@MyProject.operation
+def connecting_data(job):
+    """
+    Updates the job document with definitive paths to output files and contact results.
+
+    Parameters
+    ----------
+    job : signac.contrib.job.Job
+        The job handle 
+    """
+    prefix = job.document['data_path'] + '/'+str(job.document['params']['run'])
+    #res_prefix = job.document['results_path'] + '/' + str(job.document['params']['run'])
+    print(prefix)
+
+    job.document['gro'] = prefix + '_pi_clean.gro'
+    job.document['pdb'] = prefix + '_pi_clean.pdb'
+    job.document['xtc'] = prefix + '_full_pi_ref.xtc'
+    job.document['tcl'] = prefix + '_vmd_sys_t.tcl'
+
+    job.document['contact_record'] = prefix + '_contacts_only_t.parquet'
+    job.document['contact_meta'] = prefix+'_contacts_res_meta.parquet'
+    job.document['trajectory_meta'] =prefix+ '_time_status.parquet' 
+    # Pivot files
+    for res in ['prot', 'res_type', 'res_org', 'struc_id', 'res_dom']:
+        job.document[f'{res}_prob'] = f'{prefix}_{res}_prob_pivot.parquet'
+        job.document[f'{res}_freq'] = f'{prefix}_{res}_time_count_pivot.parquet'
+        job.document[f'{res}_perc'] = f'{prefix}_{res}_list_percistance_distribution_pivot.parquet'
+
+    exists1 = os.path.exists(job.document['gro'])
+    exists2 = os.path.exists(job.document['pdb'])
+    exists3 = os.path.exists(job.document['xtc'])
+    exists4 = os.path.exists(job.document['tcl'])
+    exists5 = os.path.exists(job.document['trajectory_meta'])
+    
+    print('gro',exists1,'pdb',exists2,'xtc', exists3, 'tcl',exists4, 'traj_meta',exists5 )
+
+
+
+@MyProject.post(breaker)
+@MyProject.operation
+def document_files(job):
+    
+    target_folder =job.path+'/results_files_lifetimes'
+    if not os.path.exists(target_folder):
+        os.makedirs(target_folder)
+        print(f"Created directory: {target_folder}")
+    
+    # We put the paths into a list and copy them one by one
+    files_to_copy = [
+        job.document['gro'],
+        job.document['pdb'],
+        #job.document['xtc'],
+        job.document['tcl'],
+        job.document['trajectory_meta'],
+        job.document['contact_record'],
+        job.document['contact_meta']
+    ]
+    
+    for res in ['res_type']:#['prot', 'res_type', 'res_org', 'struc_id', 'res_dom']:
+        files_to_copy.append(job.document[f'{res}_prob'] )
+        files_to_copy.append(job.document[f'{res}_freq'] )
+        files_to_copy.append( job.document[f'{res}_perc'] )
+    
+    for file_path in files_to_copy:
+        if os.path.exists(file_path):
+            shutil.copy(file_path, target_folder)
+            print(f"Successfully copied: {os.path.basename(file_path)}")
+        else:
+            print(f"WARNING: File not found: {file_path}")
 
 
 @MyProject.post(breaker)

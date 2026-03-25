@@ -1509,13 +1509,20 @@ def main(args):
     bool_filtering = bool(strtobool(args.bool_filtering))
     c0 = int(args.c0)
     ck = int(args.ck)
+
+    bool_test=False
     
     if ck == 0 and c0 == 0:
         bool_splid = False
         print('full system - no splid')
     else:
         bool_splid = True
-    
+
+    #testcase
+    if bool_debug and bool_splid:
+        bool_test=True
+
+    print("debug", bool_debug, "splid", bool_splid, "test", bool_test)
     
     bookkeeping_path = output_path
     os.makedirs(bookkeeping_path, exist_ok=True)
@@ -1525,9 +1532,15 @@ def main(args):
     sys_domains = pd.read_parquet(f'{path}/{label}_sys_domains.parquet')
 
     # Load Trajectory data
-    traj = [f'{path}/{label}_full_pi_ref.xtc']
-    top1 = f"{path}/{label}_pi_clean.pdb"
+
+    traj = [f'{path}/{label}_full_pi_ref.xtc'] 
+    top1 = f"{path}/{label}_pi_clean.pdb" 
     top2 = f"{path}/{label}_pi_clean.pdb"
+    
+    if bool_test:
+        traj = [f'{path}/{label}_full_pi_ref_debug_10_chains_2001.xtc'] #_full_pi_ref.xtc']
+        top1 = f"{path}/{label}_pi_clean_10_chains.pdb" #_pi_clean.pdb"
+        top2 = f"{path}/{label}_pi_clean_10_chains.pdb"
 
     # If different data for ion analysis is used
     if bool_pwi:
@@ -1563,7 +1576,7 @@ def main(args):
     #W_SEL = [f"resid {' '.join(str(r.resid) for r in batch)}" for batch in res_batches]
     #print("water devided into ",len(W_SEL), " batches of ",w_batch_size)
 
-    if bool_splid: 
+    if bool_splid or bool_test: 
         combinations_in = list(itertools.combinations(enumerate(ALL_MOLS_SEL), 2))[c0:ck] 
     elif bool_debug:
         combinations_in = list(itertools.combinations(enumerate(ALL_MOLS_SEL), 2))[10:11]
@@ -1624,13 +1637,17 @@ def main(args):
 
     if traj_max == 0:
         traj_max = len(u.trajectory) - 1
+        print('traj_max', traj_max,flush=True)
+
+    if bool_debug:
+        traj_max = 2000
+
+    if bool_test:
+        traj_max = len(u.trajectory) - 1 
 
     t_min = u.trajectory[traj_min].time
     t_max = u.trajectory[traj_max].time
 
-    if bool_debug:
-        traj_max = 2000
-    
     # trajectory parameters
     ts = (u.trajectory[-1].time - u.trajectory[-2].time) * d_step 
     frames = int(len(u.trajectory[traj_min:traj_max]) / d_step)

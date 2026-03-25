@@ -346,7 +346,7 @@ def main(args):
     #############################################################
     
     #attributes to evaluate
-    l_attributes=['res_type','res_org','prot']
+    l_attributes=['res_type','res_org','prot', 'res_dom','res_dom', 'struc_id']
 
 
     #################### single attributes ######################
@@ -365,6 +365,13 @@ def main(args):
     for attr, attr_val in zip(l_attributes,l_attr_values):
         
         analyse_attribute(attr, attr_val,dt_cont_map_all_sym,data_path,args)
+
+    #################### conditional attributes #################
+    #############################################################
+
+
+    
+
 
 
 if __name__ == "__main__":

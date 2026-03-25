@@ -3,6 +3,9 @@ import re
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sbn
+import matplotlib.ticker as ticker
+import itertools
+from matplotlib.ticker import AutoMinorLocator, LogLocator
 
 
 def flatten_mi(labels):
@@ -15,6 +18,210 @@ def decimate(n, target=60):
     import math
     return max(1, math.ceil(n / target))
 
+
+def plot_hist(sub_df, output_filename, color_map, title="hist", scale=1,pairs=np.array([["ARG", "LYS"]])):
+
+    data_to_plot = []
+    plot_labels = []
+    l_colors = []
+    allowed = [tuple(p) for p in pairs]
+
+    # --------------------------------------------------
+    # Collect data
+    # --------------------------------------------------
+    for (row_idx, col_name), cell_value in sub_df.stack().items():
+
+        if (row_idx, col_name) not in allowed:
+            continue
+
+        if isinstance(cell_value, list) and cell_value:
+            data_to_plot.append(np.array(cell_value) * scale)
+            plot_labels.append(f"{row_idx}|{col_name}")
+            l_colors.append(color_map[f"{row_idx}_{col_name}"])
+
+    if not data_to_plot:
+        print("No data to plot.")
+        return
+
+    # --------------------------------------------------
+    # Log-safe filtering
+    # --------------------------------------------------
+    data_to_plot = [np.asarray(d, float) for d in data_to_plot]
+    data_to_plot = [d[d > 0] for d in data_to_plot]
+    data_to_plot = [d for d in data_to_plot if d.size > 0]
+
+    all_data = np.concatenate(data_to_plot)
+    xmin, xmax = all_data.min(), all_data.max()
+
+    bins = np.logspace(np.log10(xmin), np.log10(xmax), 100)
+
+    # --------------------------------------------------
+    # Plot
+    # --------------------------------------------------
+    plt.figure(figsize=(5, 4), dpi=300)
+
+    plt.hist(
+        data_to_plot,
+        label=plot_labels,
+        color=l_colors,
+        density=True,
+        bins=bins,
+        histtype="step",
+        cumulative=-1,
+        lw=2
+    )
+
+    plt.xlim(0.6, 1000)
+    #plt.yscale("log")
+    #plt.xscale("log")
+
+    ax = plt.gca()
+
+    # --------------------
+    # X axis (LINEAR)
+    # --------------------
+    #ax.xaxis.set_major_locator(LogLocator(base=10))
+    ax.xaxis.set_minor_locator(AutoMinorLocator(5))
+
+    # --------------------
+    # Y axis (LOG)
+    # --------------------
+    #ax.yaxis.set_major_locator(LogLocator(base=10))
+    ax.yaxis.set_minor_locator(LogLocator(base=10, subs=[2,3,4,5,6,7,8,9]))
+
+    # Tick appearance
+    ax.tick_params(axis="x", which="major", labelsize=18)
+    #ax.tick_params(axis="x", which="minor", labelsize=14, length=4)
+    ax.tick_params(axis="y", which="major", labelsize=18)
+    #ax.tick_params(axis="y", which="minor", labelsize=14, length=4)
+
+    ax.grid(True, which="major", linestyle="--", alpha=0.6)
+    #ax.grid(True, which="minor", linestyle=":", alpha=0.3)
+
+    plt.legend(title=title, fontsize=9, title_fontsize=10)
+    plt.xlabel("Persistence Time (ns)", fontsize=18)
+    plt.ylabel("Probability Density", fontsize=18)
+
+    plt.tight_layout()
+    plt.savefig(
+        title+".png",
+        dpi=600,
+        bbox_inches="tight"
+    )
+
+
+
+def plot_boxplots_whisker_scaled(sub_df, output_filename, color_map,val_title,scale=1, pairs=np.array([["ARG", "LYS"]])):
+    """
+    Generates side-by-side boxplots where the whisker-to-whisker range 
+    fills approximately 2/3 of the y-axis, ignoring outliers for scaling.
+
+    Args:
+        sub_df (pd.DataFrame): DataFrame where cells may contain lists of numerical data.
+        attr (str): The base attribute name for labeling, used in the plot title.
+        output_filename (str): The path and filename to save the output image.
+        color_map (dict): A dictionary mapping a unique key to a color.
+    """
+    data_to_plot = []
+    plot_labels = []
+    l_colors = []
+    allowed = [tuple(p) for p in pairs]
+
+    # 1. Collect data, labels, and colors from the dataframe
+    for (row_idx, col_name), cell_value in sub_df.stack().items():
+
+        if (row_idx, col_name) not in allowed:
+            continue
+
+        if isinstance(list(cell_value), list) and list(cell_value):
+
+            
+            data_to_plot.append(np.array(cell_value)*scale)
+            plot_labels.append(f'{row_idx}|{col_name}')
+            l_colors.append(color_map.get(f"{row_idx}_{col_name}", "#cccccc"))
+
+    if not data_to_plot:
+        print("No data found to plot.")
+        return
+
+    # 2. Set up the figure and axes
+    n_plots = len(data_to_plot)
+    fig_width = max(10, 1.5 * n_plots)
+    fig, ax = plt.subplots(figsize=(10, 5), dpi=300)
+
+    # 3. Create the initial boxplots to access their properties
+    box_plot = ax.boxplot(data_to_plot, patch_artist=True, labels=plot_labels, showfliers=True, showmeans=True, boxprops=dict(linewidth=1, color='black'),
+    whiskerprops=dict(linewidth=1, color='black'),
+    capprops=dict(linewidth=1, color='black'),
+    medianprops=dict(linewidth=1.5, color='black'),
+    meanprops=dict(marker='^', markerfacecolor='green', markeredgecolor='black', markersize=6),
+    flierprops=dict(marker='*',markersize=3,markerfacecolor='#FCCDE5',markeredgecolor='none',alpha=0.2))
+
+    # LOG SCALE
+    ax.set_yscale("log")
+
+    # 4. NEW: Determine the y-axis limits based on whisker positions
+    # Get the y-positions of all whisker caps (the horizontal lines at the whisker ends)
+    caps = box_plot['caps']
+    whisker_positions = [cap.get_ydata()[0] for cap in caps]
+
+    means = [marker.get_ydata()[0] for marker in box_plot['means']] #box_plot['means']
+    
+    # Find the global min and max of the whiskers
+    whisker_min = min(whisker_positions)
+    whisker_max = max(whisker_positions)
+
+    
+    # Find the global min and max of the whiskers
+    mean_min = min(means)
+    mean_max = max(means)
+
+    
+    
+    # Calculate the range and the required padding based on the 2/3 rule
+    whisker_range = whisker_max - whisker_min
+    padding = whisker_range / 4.0
+    
+    y_lim_min = 0.3
+    y_lim_max = 1000
+    
+    # Apply the calculated y-axis limits
+    ax.set_ylim(y_lim_min, y_lim_max)
+
+    # 5. Apply custom colors to each box
+    for patch, color in zip(box_plot['boxes'], l_colors):
+        patch.set_facecolor(color)
+
+    # 6. Customize the plot for clarity
+    #ax.set_title(f'Side-by-Side Boxplot Comparison for {attr}', fontsize=16)
+    ax.set_ylabel('Persistence (ns) ', fontsize=18)
+    #ax.set_xlabel(val_title)
+    plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor", fontsize=18)
+    ax.yaxis.grid(True, linestyle='--', which='major', color='grey', alpha=0.7)
+    ax.tick_params(axis='y', labelsize=18)
+    
+    # 7. Finalize and save the figure
+    plt.tight_layout()
+    plt.savefig(val_title+".png", dpi=600, bbox_inches="tight")
+
+
+
+def plot_df(df,xlabel=" ",ylabel=" ",label="", file='./plot'):
+    fig, ax = plt.subplots()
+    ax.set_aspect("equal")
+    heatmap=sbn.heatmap(df,xticklabels=True,yticklabels=True,square=False,cbar=True,cbar_kws={"shrink": 0.75},cmap="Spectral_r",annot=False)
+    heatmap.invert_yaxis()
+    colorbar = heatmap.collections[0].colorbar  # Get the colorbar from the heatmap
+    colorbar.set_label(label)
+    colorbar.ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.4f'))
+    fig.tight_layout()
+    ax.set_xlabel(xlabel)#, fontsize=32)
+    ax.set_ylabel(ylabel)#, fontsize=32)
+    # Increase tick label font size
+    ax.tick_params(axis='x',  rotation=90)
+    ax.tick_params(axis='y')
+    print(file)
+    fig.savefig(file, dpi=100, bbox_inches="tight")
 
 
 

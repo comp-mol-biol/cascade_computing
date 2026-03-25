@@ -191,8 +191,11 @@ def main(path,output_path,contact_path,label,results_name,bool_pwi,bool_bonds):
     if matching_files:
         job_dict = pd.read_parquet(matching_files[0])
 
-    all_domain_names=job_dict['domains_ordered'].iloc[0].split(";")
-    
+    try:
+        all_domain_names=job_dict['domains_ordered'].iloc[0].split(";")
+    except:
+        all_domain_names=[]
+        
     # load domains
     domains = pd.read_parquet(f'{path}/{label}_domains.parquet')
     sys_domains= pd.read_parquet(f'{path}/{label}_sys_domains.parquet')
@@ -340,10 +343,10 @@ def main(path,output_path,contact_path,label,results_name,bool_pwi,bool_bonds):
     print("df_contact_map_all, loaded", flush=True)
 
     #add length of frames in contact
-    df_contact_map_all['len_contacts'] = df_contact_map_all['frame_dt'].apply(
-    lambda x: len(x) if isinstance(x, (list, tuple, str, np.ndarray)) else 0)
+    #df_contact_map_all['len_contacts'] = df_contact_map_all['frame_dt'].apply(
+    #lambda x: len(x) if isinstance(x, (list, tuple, str, np.ndarray)) else 0)
 
-    df_contact_map_all['len_contacts2'] = df_contact_map_all['frame_d2t'].apply(
+    df_contact_map_all['len_contacts'] = df_contact_map_all['frame_d2t'].apply(
     lambda x: len(x) if isinstance(x, (list, tuple, str, np.ndarray)) else 0)
 
 
@@ -438,7 +441,7 @@ def main(path,output_path,contact_path,label,results_name,bool_pwi,bool_bonds):
         )
         else:
             print('saving without special bonds')
-            clmns=['res_a', 'res_b', 'frame','frame_lb','frame_dt','frame_d2t','len_contacts','len_contacts2','mol_ind_a', 'res_dom_a', 'res_type_a', 'struc_id_a', 'prot_a','res_org_a', 'mol_ind_b', 'res_dom_b', 'res_type_b', 'struc_id_b','prot_b', 'res_org_b','percistance_times','percistance_times2','avg_persistence', 'median_persistence']
+            clmns=['res_a', 'res_b', 'frame','frame_lb','frame_dt','frame_d2t','len_contacts','mol_ind_a', 'res_dom_a', 'res_type_a', 'struc_id_a', 'prot_a','res_org_a', 'mol_ind_b', 'res_dom_b', 'res_type_b', 'struc_id_b','prot_b', 'res_org_b','percistance_times','avg_persistence', 'median_persistence']
             dt_cont_map_all_sym[clmns].to_parquet(
             f'{data_path}/{label}{title}_t.parquet',
             engine='pyarrow',              # best support for column-wise reads
@@ -446,7 +449,7 @@ def main(path,output_path,contact_path,label,results_name,bool_pwi,bool_bonds):
             index=False                    # skip index to save space
         )
     except:
-        print("saving", flush=True)
+        print("saving exception", flush=True)
         dt_cont_map_all_sym[['res_a', 'res_b', 'frame_dt','len_contacts',
        'mol_ind_a', 'res_dom_a', 'res_type_a', 'struc_id_a', 'prot_a',
        'res_org_a', 'mol_ind_b', 'res_dom_b', 'res_type_b', 'struc_id_b',
