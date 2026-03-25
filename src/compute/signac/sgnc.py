@@ -369,7 +369,7 @@ def vizualization(job):
         print(content)
         with open(output_path + '/' + label_new + "_vmd_sys.tcl", 'w') as file:
             file.write(content)
-        print(output_path + '/' + label_new + "_vmd_sys.tcl")
+        
         content_t = vztools.create_vmd_file(domains_sys, './' + label_new + '_pi_clean.gro', 
                                             traj='./' + label_new + '_full_pi_ref.xtc', 
                                             lab=label_new + "_mol", type='VDW', 
@@ -380,8 +380,6 @@ def vizualization(job):
         
         with open(output_path + '/' + label_new + "_vmd_sys_t.tcl", 'w') as file:
             file.write(content_t) 
-
-        print(output_path + '/' + label_new + "_vmd_sys_t.tcl")
     
         log_vcont = output_path + '/' + '%j_' + label_new + '_viz.out'
         str_run = "! sbatch --mail-type=ALL --mail-user=" + EMAIL + " --output=" + log_vcont + ' ' + PATH_FUNCTIONS + '/contact_viz.sh ' + output_path + " " + output_path + '/' + label_new + "_vmd_sys.tcl"
@@ -563,8 +561,8 @@ def collecting_data(job):
     # Pivot files
     for res in ['prot', 'res_type', 'res_org', 'struc_id', 'res_dom']:
         job.document[f'{res}_prob'] = f'{res_prefix}_{res}_prob_pivot.parquet'
-        job.document[f'{res}_freq'] = f'{res_prefix}_{res}_2time_count_pivot.parquet'
-        job.document[f'{res}_perc'] = f'{res_prefix}_{res}_list_percistance2_distribution_pivot.parquet'
+        job.document[f'{res}_freq'] = f'{res_prefix}_{res}_time_count_pivot.parquet'
+        job.document[f'{res}_perc'] = f'{res_prefix}_{res}_list_percistance_distribution_pivot.parquet'
 
     exists1 = os.path.exists(job.document['gro'])
     exists2 = os.path.exists(job.document['pdb'])
@@ -618,7 +616,7 @@ def connecting_data(job):
 @MyProject.operation
 def document_files(job):
     
-    target_folder =job.path+'/results_files_lifetimes'
+    target_folder =job.path+'/results_files'
     if not os.path.exists(target_folder):
         os.makedirs(target_folder)
         print(f"Created directory: {target_folder}")
@@ -627,14 +625,14 @@ def document_files(job):
     files_to_copy = [
         job.document['gro'],
         job.document['pdb'],
-        #job.document['xtc'],
+        job.document['xtc'],
         job.document['tcl'],
         job.document['trajectory_meta'],
         job.document['contact_record'],
-        job.document['contact_meta']
+        job.document['contact_meta'], 
     ]
     
-    for res in ['res_type']:#['prot', 'res_type', 'res_org', 'struc_id', 'res_dom']:
+    for res in ['prot', 'res_type', 'res_org', 'struc_id', 'res_dom']:
         files_to_copy.append(job.document[f'{res}_prob'] )
         files_to_copy.append(job.document[f'{res}_freq'] )
         files_to_copy.append( job.document[f'{res}_perc'] )
