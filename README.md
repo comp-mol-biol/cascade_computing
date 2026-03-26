@@ -1,8 +1,8 @@
-# README: Simulation Project Setup with Signac
+# README: Cascade computing - contact analysis
 
 ---
 
-## 1. Environment Setup
+## 1. Environment Setup & Run
 
 ### Create a Virtual Environment
 
@@ -15,9 +15,9 @@ python -m venv yourname
 
 ### Activate the Environment
 
-Activate the environment to load changes and use the isolated shell:
+Activate the environment:
 
-**Bash (Linux/macOS):**
+**Bash:**
 
 ```bash
 source ./yourname/bin/activate
@@ -31,20 +31,85 @@ Install the required packages using the provided requirements files. Ensure you 
 **For Cascade Computing (CC):**
 
 ```bash
-pip install -r ./PATH_TO/requirements_cc.txt
+pip install -r ./cascade_computing/requirements_cc.txt
 
 ```
 
-## 2. Path and Project Initialization
+### Create IPython Kernel 
+Create a kernel that you can use inside Jupyter Lab to use your enviroment
 
-Open `setup_analysis.ipynb` and configure your local paths:
+```bash
+python -m ipykernel install --user --name=yourname --display-name "cc_kernel"
+
+```
+
+### Run Jupyter lab
+Jupyter lab runs in the local browser
+
+```bash
+jupyer lab &
+
+```
+or you can direct it to a port on your HPC system
+
+```bash
+nohup jupyter notebook --no-browser --port=8008 &
+```
+in the second case you need to log onto your HPC system with the same port: `ssh -L 8008:localhost:8008 yourHPC`.
+
+Check if its running using:
+```bash
+jupyer list
+
+```
+
+
+## 2. Explore examples
+
+### MUT16-FFR example
+
+Download the corresponding dataset (MUT16_FFR_atm_analysis_part.zip) from `https://zenodo.org/uploads/19239689` and unpack the folder into the examples directory - then open & run: 
+```bash
+examples/minimal_example_MUT16_FFR.ipnyb
+```
+
+You might have to set the path to your cascade_computing directory.
+The examples shows you what the results of the analysis can look like:
+
+-what does the contact record include
+-how are the contact frequencies and lifetimes saved
+-how to evaluate the corresponding distributions
+
+### Tests
+Download the corresponding dataset (data.zip) from `https://zenodo.org/uploads/19239689 and unpack the folder into the examples directory.  There are two test scripts included, that you can use to get insight into the contact calculations.
+The first one in
+```bash
+tests/unit_test.ipnyb
+```
+shows contact calculations and runs a small example that calculated also specific bond interaction.
+The second one in 
+```bash
+tests/debug_test.ipnyb
+```
+allows you to verify agains pre-computed data, in case you modify or extend your version of the code. 
+
+
+## 3. Run analysis on your data
+
+Open 
+
+```bash
+`setup_analysis.ipynb`
+```
+
+then start by configuring your local paths:
 
 1. **Repository Path**: Set `path_git` to your local clone of the `cascade_computing` repository.
 2. **Project Name**: Set `p_name` to a unique identifier (e.g., `'MUT16_MUT8'`). This creates a dedicated workspace for your project.
 
 ---
 
-## 3. System Requirements & Configuration
+### System Requirements & Configuration
 
 To analyze your system, you must specify the proteins and their structural properties.
 
@@ -152,11 +217,3 @@ The project is configured with the following operations:
 
 **Note on Modifications:** To modify these functions, edit the source file located at:
 `cascade_computing/src/compute/signac/sgnc.py`
-
----
-
-## 6. Examples & Test
-
-The notebook cascade_computing/tests/debug_test.ipynb allows you test how to use the contact calculation and evaluation on your system. 
-We provide a small trajectory and the resulting contact data of the test run here: https://seafile.rlp.net/seafhttp/f/f448889532704bf98a28/?op=view
-After downloading, unpack the data folder into the cascade_computing/examples folder. You can follow through the debug_test.ipynb using this data.

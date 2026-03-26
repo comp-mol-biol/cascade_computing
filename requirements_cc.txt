@@ -21,4 +21,5 @@ pyarrow==23.0.1
 tables==3.10.1
 biopython==1.86
 fastparquet==2026.3.0
+contact-map==0.7.0
 

@@ -19,27 +19,36 @@ def decimate(n, target=60):
     return max(1, math.ceil(n / target))
 
 
-def plot_hist(sub_df, output_filename, color_map, title="hist", scale=1,pairs=np.array([["ARG", "LYS"]])):
+def plot_hist(sub_df, output_filename, color_map, title="hist", scale=1,pairs=[], label="Lifetime (ns)"):
 
     data_to_plot = []
     plot_labels = []
     l_colors = []
     allowed = [tuple(p) for p in pairs]
 
-    # --------------------------------------------------
-    # Collect data
-    # --------------------------------------------------
     for (row_idx, col_name), cell_value in sub_df.stack().items():
 
-        if (row_idx, col_name) not in allowed:
-            continue
+        if len(allowed)>0: 
+            if (row_idx, col_name) not in allowed:
+                continue
 
         if isinstance(cell_value, list) and cell_value:
             data_to_plot.append(np.array(cell_value) * scale)
             plot_labels.append(f"{row_idx}|{col_name}")
             l_colors.append(color_map[f"{row_idx}_{col_name}"])
 
-    if not data_to_plot:
+    #print(l_colors)
+    #print(plot_labels)
+    #print(data_to_plot)
+
+    if len(allowed)<1:
+        l_colors=[l_colors[0]]
+        plot_labels=["overall"]
+        print(len(data_to_plot))
+        data_to_plot=[np.concatenate(data_to_plot)]
+        print(len(data_to_plot))
+        
+    if len(data_to_plot)<1:
         print("No data to plot.")
         return
 
@@ -99,7 +108,7 @@ def plot_hist(sub_df, output_filename, color_map, title="hist", scale=1,pairs=np
     #ax.grid(True, which="minor", linestyle=":", alpha=0.3)
 
     plt.legend(title=title, fontsize=9, title_fontsize=10)
-    plt.xlabel("Persistence Time (ns)", fontsize=18)
+    plt.xlabel(label, fontsize=18)
     plt.ylabel("Probability Density", fontsize=18)
 
     plt.tight_layout()
@@ -111,7 +120,7 @@ def plot_hist(sub_df, output_filename, color_map, title="hist", scale=1,pairs=np
 
 
 
-def plot_boxplots_whisker_scaled(sub_df, output_filename, color_map,val_title,scale=1, pairs=np.array([["ARG", "LYS"]])):
+def plot_boxplots_whisker_scaled(sub_df, output_filename, color_map,val_title,scale=1, pairs=np.array([["ARG", "LYS"]]), label="Lifetime (ns)"):
     """
     Generates side-by-side boxplots where the whisker-to-whisker range 
     fills approximately 2/3 of the y-axis, ignoring outliers for scaling.
@@ -194,7 +203,7 @@ def plot_boxplots_whisker_scaled(sub_df, output_filename, color_map,val_title,sc
 
     # 6. Customize the plot for clarity
     #ax.set_title(f'Side-by-Side Boxplot Comparison for {attr}', fontsize=16)
-    ax.set_ylabel('Persistence (ns) ', fontsize=18)
+    ax.set_ylabel(label, fontsize=18)
     #ax.set_xlabel(val_title)
     plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor", fontsize=18)
     ax.yaxis.grid(True, linestyle='--', which='major', color='grey', alpha=0.7)
