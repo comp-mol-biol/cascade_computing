@@ -59,12 +59,19 @@ in the second case you need to log onto your HPC system with the same port: `ssh
 
 Check if its running using:
 ```bash
-jupyer list
+jupyer notebook list
 
 ```
 
 
 ## 2. Explore examples
+
+### Tiny example in Binder (no-installation)
+To get an idea of our contact evaluation you can play around with a small contact-table and plot lifetimes as well as frequencies.
+The dataset does not include a full system so keep in mind, that some amino-acid pairs are not included.
+
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/luhtzia/cascade_computing/dev_branch?urlpath=%2Fdoc%2Ftree%2Fexamples%2Ftiny_example_MUT16_FFR.ipynb)
+
 
 ### MUT16-FFR example
 
@@ -102,7 +109,7 @@ Open
 `setup_analysis.ipynb`
 ```
 
-then start by configuring your local paths:
+then start by configuring your local paths, the notebook will guide you through the setup. 
 
 1. **Repository Path**: Set `path_git` to your local clone of the `cascade_computing` repository.
 2. **Project Name**: Set `p_name` to a unique identifier (e.g., `'MUT16_MUT8'`). This creates a dedicated workspace for your project.
@@ -212,7 +219,7 @@ The project is configured with the following operations:
 * **`transform`**: Trajectory transformation (centering, PBC wrapping).
 * **`contacts`**`: Computing residue-residue contact maps.
 * **`eval_contacts`**: Contact evaluation and creation of the contact record
-* **``analysis**`: Downstream analysis e.g. pivot tables from the contact record
+* **`analysis`**: Downstream analysis e.g. pivot tables from the contact record
 * **`visualization`**: Generating plots .
 
 **Note on Modifications:** To modify these functions, edit the source file located at:
