@@ -5,7 +5,7 @@
 ![MUT16-FFR phase-serperated condensate](./abstract.png)
 
 ## Background:
- MUT16 acts as a primary scaffold within \textit{C. elegans} mutator foci, where its Foci Forming Region (FFR) nucleates condensates that recruit downstream siRNA amplification machinery [1]. This study elucidates the \textbf{molecular grammar of MUT16-FFR} phase separation by quantifying \textbf{residue-residue contact frequencies} and \textbf{contact lifetimes}, while characterizing the specific regulatory role of ionic associations in condensate formation.
+ MUT16 acts as a primary scaffold within *C. elegans* mutator foci, where its Foci Forming Region (FFR) nucleates condensates that recruit downstream siRNA amplification machinery [1]. This study elucidates the **molecular grammar of MUT16-FFR** phase separation by quantifying **residue-residue contact frequencies** and **contact lifetimes**, while characterizing the specific regulatory role of ionic associations in condensate formation.
 
  previous work:
 
@@ -177,7 +177,7 @@ mut16 = {
 
 ### The df_domains Reference Table
 
-The notebook aggregates these dictionaries into a `df_domains` table. This serves as the primary metadata source, allowing the notebook to automatically extract amino acid sequences and map analysis results to specific domains.
+The notebook aggregates these dictionaries into a `df_domains` table. This serves as the primary metadata source, allowing the notebook to automatically extract amino acid sequences and map analysis results to specific domains or amino-acid types.
 
 ---
 
@@ -185,7 +185,7 @@ The notebook aggregates these dictionaries into a `df_domains` table. This serve
 
 ### Load the Project
 
-The notebook connects to the database created during setup. It looks for a `signac.rc` file in your directory to identify the project.
+The notebook connects to project. It looks for a `.signac/config` file in your directory to identify the project.
 
 ```python
 import signac
@@ -195,7 +195,7 @@ project = signac.get_project()
 
 ### Filter and Select Jobs
 
-You can filter for specific proteins or concentrations to limit the scope of your operations:
+You can filter all your jobs for specific proteins or concentrations, thus define a scope of your operations:
 
 ```python
 # Select all jobs
@@ -210,13 +210,13 @@ for job in project.find_jobs({'prot': 'MUT16'}):
 
 ### Execute Operations
 
-Use the `project.run()` method. This is the preferred execution method as it handles environment variables and logging automatically.
+Use the `project.run()` method for your choice of jobs.
 
-**Example: Running a transformation**
+**Example: Running a contact analysis**
 
 ```python
 project.run(
-    names=['transform'], 
+    names=['contacts'], 
     jobs=[job], 
     progress=True, 
     num_passes=1, 
@@ -236,7 +236,7 @@ project.run(
 
 ## 6. Available Operations
 
-The project is configured with the following operations:
+The project at this point includes the following operations:
 
 * **`post_processing`**: Sets up the analysis framework.
 * **`transform`**: Trajectory transformation (centering, PBC wrapping).
@@ -245,5 +245,5 @@ The project is configured with the following operations:
 * **`analysis`**: Downstream analysis e.g. pivot tables from the contact record
 * **`visualization`**: Generating plots .
 
-**Note on Modifications:** To modify these functions, edit the source file located at:
+**Note on Modifications:** To modify these or extend these functions, edit the source file located at:
 `cascade_computing/src/compute/signac/sgnc.py`
