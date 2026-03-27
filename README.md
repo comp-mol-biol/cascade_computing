@@ -5,7 +5,7 @@
 ![MUT16-FFR phase-serperated condensate](./abstract.png)
 
 ## Background:
- MUT16 acts as a primary scaffold within *C. elegans* mutator foci, where its Foci Forming Region (FFR) nucleates condensates that recruit downstream siRNA amplification machinery [1]. This study elucidates the **molecular grammar of MUT16-FFR** phase separation by quantifying **residue-residue contact frequencies** and **contact lifetimes**, while characterizing the specific regulatory role of ionic associations in condensate formation.
+ MUT16 acts as a primary scaffold within *C. elegans* mutator foci.  MUT-16’s Foci Forming Region (FFR) is essential for the formation of condensates that recruit downstream siRNA amplification machinery [1]. This study elucidates the **molecular grammar of MUT16-FFR** phase separation by quantifying **residue-residue contact frequencies** and **contact lifetimes**, while characterizing the specific regulatory role of ion associations in condensate formation. For this we analyse us-long atomistic molecular dynamics simulations.This is computationally challenging as the many interactions need to be tracked for large atomistic structures over MD-trajectory data in the order of microseconds, which we address with cascade-computing.
 
  previous work:
 
