@@ -1,10 +1,54 @@
-# README: Cascade computing - contact analysis
+# README: Condensate dynamics of MUT16 using Cascade Computing
 
 ---
 
-## 1. Environment Setup & Run
+![MUT16-FFR phase-serperated condensate](./abstract.png)
 
-### Create a Virtual Environment
+## Background:
+ MUT16 acts as a primary scaffold within \textit{C. elegans} mutator foci, where its Foci Forming Region (FFR) nucleates condensates that recruit downstream siRNA amplification machinery [1]. This study elucidates the \textbf{molecular grammar of MUT16-FFR} phase separation by quantifying \textbf{residue-residue contact frequencies} and \textbf{contact lifetimes}, while characterizing the specific regulatory role of ionic associations in condensate formation.
+
+ previous work:
+
+ [1] Gaurav K, Busetto V, Páez-Moscoso D ...Multi-scale simulations of MUT-16 scaffold protein phase separation and client recognition Biophysical Journal, 2025; 124, 3987-4004 https://doi.org/10.1016/j.bpj.2025.08.001
+
+## Publication: https://doi.org/10.5281/zenodo.19219063
+
+## Cascade computing: 
+We use Signac to build an extendable HPC-optimized workflow for high-throughput contact analysis in MD simulations. This reproducable approach streamlines MD trajectory processing by eliminating redundant data traversals and ensuring flexible downstream analysis based on a single contact record file.
+
+* **Contact records:** Contact features are stored as metadata alongside contact data (HDF5).
+* **Conditional contact maps:** Organized with respect to protein species, amino-acid pairs, or residue IDs (pandas).
+
+It can easily be extended to the needs of the user by adding individual functions to the signac workflow (see instructions below).
+
+
+## Explore examples
+
+
+
+### Tiny example in Binder (no-installation)
+To get an idea of our contact evaluation you can play around with a small contact-table and plot lifetimes as well as frequencies.
+The dataset does not include a full system so keep in mind, that some amino-acid pairs are not included.
+
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/comp-mol-biol/cascade_computing/MUT16_FFR_v0.1?urlpath=%2Fdoc%2Ftree%2Fexamples%2Ftiny_example_MUT16_FFR.ipynb)
+
+
+### MUT16-FFR example
+
+Download the corresponding dataset (MUT16_FFR_atm_analysis_part.zip) from `https://zenodo.org/uploads/19239689` and unpack the folder into the examples directory - then open & run: 
+```bash
+examples/minimal_example_MUT16_FFR.ipnyb
+```
+
+You might have to set the path to your cascade_computing directory.
+The examples shows you what the results of the analysis can look like:
+
+* what does the contact record include
+* how are the contact frequencies and lifetimes saved
+* how to evaluate the corresponding distributions
+
+
+## 1. Cascade computing: Environment Setup & Run
 
 First, create an isolated environment. Replace `yourname` with your preferred environment name (e.g., `sim_env`).
 
@@ -31,7 +75,7 @@ Install the required packages using the provided requirements files. Ensure you 
 **For Cascade Computing (CC):**
 
 ```bash
-pip install -r ./cascade_computing/requirements_cc.txt
+pip install -r ./cascade_computing/requirements.txt
 
 ```
 
@@ -64,30 +108,9 @@ jupyer notebook list
 ```
 
 
-## 2. Explore examples
-
-### Tiny example in Binder (no-installation)
-To get an idea of our contact evaluation you can play around with a small contact-table and plot lifetimes as well as frequencies.
-The dataset does not include a full system so keep in mind, that some amino-acid pairs are not included.
-
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/luhtzia/cascade_computing/dev_branch?urlpath=%2Fdoc%2Ftree%2Fexamples%2Ftiny_example_MUT16_FFR.ipynb)
 
 
-### MUT16-FFR example
-
-Download the corresponding dataset (MUT16_FFR_atm_analysis_part.zip) from `https://zenodo.org/uploads/19239689` and unpack the folder into the examples directory - then open & run: 
-```bash
-examples/minimal_example_MUT16_FFR.ipnyb
-```
-
-You might have to set the path to your cascade_computing directory.
-The examples shows you what the results of the analysis can look like:
-
--what does the contact record include
--how are the contact frequencies and lifetimes saved
--how to evaluate the corresponding distributions
-
-### Tests
+## 2. Tests
 Download the corresponding dataset (data.zip) from `https://zenodo.org/uploads/19239689 and unpack the folder into the examples directory.  There are two test scripts included, that you can use to get insight into the contact calculations.
 The first one in
 ```bash
