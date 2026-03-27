@@ -2,15 +2,15 @@
 # 1. Ignore all hidden files and folders (starting with a dot)
 
 # 2. EXPLICITLY ALLOW .signac folder
-!.signac/
-!.signac/**
+#!.signac/
+#!.signac/**
 
 # 3. Allow specific hidden configuration files
 !.gitignore
 # !.github/  <-- Uncomment if you use GitHub Actions
 
 
-.*
+#.*
 
 ### --- Temporary & Output Files ---
 *.out
